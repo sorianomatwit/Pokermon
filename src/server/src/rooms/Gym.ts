@@ -1,12 +1,16 @@
 import { Client, Room } from 'colyseus';
-import GameState, { Card, ICard, Trainer } from './schema/GameState';
+import GameState from './schema/GameState';
 import { Dispatcher } from '@colyseus/command';
 import { Message } from '../../../SharedTypes/Enums';
-import { isSwappingPokeCard as SwappingPokeCard, SelectPokeCardCommand } from '../../commands/Commands';
 import { ArraySchema } from '@colyseus/schema';
+import SelectPokeCardCommand from '../../commands/SelectPokeCardCommand';
+import SwappingPokeCard from '../../commands/SwappingCardCommand';
+import { Trainer } from './schema/Trainer';
+import { Card } from './schema/Card';
+import DetermineWinnerCommand from '../../commands/DetermineWinnerCommand';
 
 export default class Gym extends Room<GameState> {
-    private dispatcher = new Dispatcher(this);
+    public dispatcher = new Dispatcher(this);
 
     onCreate(): void | Promise<any> {
         this.maxClients = 4;
@@ -17,7 +21,7 @@ export default class Gym extends Room<GameState> {
         this.onMessage(Message.SelectPokeCard, (client: Client, message: { index: number }) => {
             this.dispatcher.dispatch(new SelectPokeCardCommand(), {
                 client: client,
-                num: message.index
+                num: message.index  
             })
         });
 
@@ -27,10 +31,16 @@ export default class Gym extends Room<GameState> {
                 bool: message.swap
             })
         });
+
+        this.onMessage(Message.TrainerBattle, (client: Client) => {
+            console.log("fight message");
+            
+            this.dispatcher.dispatch(new DetermineWinnerCommand(), {client: client});
+        })
     }
     onJoin(client: Client, options: any) {
 
-        this.state.trainers.set(client.sessionId, new Trainer());
+        this.state.trainers.set(client.sessionId, new Trainer(client.sessionId));
         //Deal 5 cards
         console.log(`${client.sessionId} joined!`);
 
@@ -70,6 +80,8 @@ export default class Gym extends Room<GameState> {
     private retrieveAllCards(cards: ArraySchema<Card>) {
         for (let i = cards.length - 1; i >= 0; i--) {
             this.state.pickupPile.push(cards[i]);
+            cards[i].isRevealedToClient = false;
+            cards[i].isRevealedToEveryone = false;
             cards.deleteAt(i);
         }
     }

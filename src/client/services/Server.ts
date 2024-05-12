@@ -13,7 +13,7 @@ export default class Server {
     private client: Client;
     private events: Phaser.Events.EventEmitter;
     private room?: Room<IGameState & Schema>;
-    public sessionID?: string;
+    public sessionId?: string;
     constructor() {
         this.client = new Client('http://localhost:2567');
         this.events = new Phaser.Events.EventEmitter();
@@ -22,7 +22,7 @@ export default class Server {
     public async join() {
         this.room = await this.client.joinOrCreate<IGameState & Schema>("gym");
 
-        this.sessionID = this.room.sessionId;
+        this.sessionId = this.room.sessionId;
         this.room.onStateChange.once((state) => {
             this.events.emit(ServerEvents.OnceStateChange, state);
         })
@@ -41,14 +41,22 @@ export default class Server {
 
 
 
-    public TrainerSelectPokeCard(index: number) {
+    public selectPokeCard(payload: {index: number}) {
+        
         if (!this.room) return;
-        this.room.send(Message.SelectPokeCard, { index: index });
+        this.room.send(Message.SelectPokeCard, payload);
     }
 
-    public SwapWithHidden(isSwapping: boolean){
+    public SwapWithHidden(payload: { swap: boolean }){
         if (!this.room) return;
-        this.room.send(Message.SwapPokeCard, { swap: isSwapping });
+        this.room.send(Message.SwapPokeCard, payload);
+    }
+
+    public fight() {
+        console.log("fight");
+        
+        if (!this.room) return;
+        this.room.send(Message.TrainerBattle);
     }
 
 }
