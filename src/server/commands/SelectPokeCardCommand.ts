@@ -16,7 +16,6 @@ export default class SelectPokeCardCommand extends Command<Gym, Payload> {
     execute(data: Payload) {
 
         const { client, num: index } = data;
-        console.log(`${client.sessionId} selected ${index}`);
 
         const trainer = this.state.trainers.get(client.sessionId);
         if (!trainer.pokeCards[index]) {
@@ -25,8 +24,8 @@ export default class SelectPokeCardCommand extends Command<Gym, Payload> {
         }
         trainer.cardsInPlay.push(trainer.pokeCards[index]);
         trainer.cardsInPlay[InPlay.BATTLE].placement = 0;
-        trainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = true;
         trainer.pokeCards.deleteAt(index);
-        this.room.dispatcher.dispatch(new DealSumCardsCommand(), {sessionId: client.sessionId, trainer: trainer});
+        this.state.doneFighting.set(client.sessionId, false);
+        this.room.dispatcher.dispatch(new DealSumCardsCommand(), { client: client });
     }
 }

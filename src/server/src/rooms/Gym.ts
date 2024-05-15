@@ -8,6 +8,8 @@ import SwappingPokeCard from '../../commands/SwappingCardCommand';
 import { Trainer } from './schema/Trainer';
 import { Card } from './schema/Card';
 import DetermineWinnerCommand from '../../commands/DetermineWinnerCommand';
+import SetupTieBreakerCommand from '../../commands/setupTieBreakerCommand';
+import TieBreakerCommand from '../../commands/TieBreakerCommand';
 
 export default class Gym extends Room<GameState> {
     public dispatcher = new Dispatcher(this);
@@ -21,7 +23,7 @@ export default class Gym extends Room<GameState> {
         this.onMessage(Message.SelectPokeCard, (client: Client, message: { index: number }) => {
             this.dispatcher.dispatch(new SelectPokeCardCommand(), {
                 client: client,
-                num: message.index  
+                num: message.index
             })
         });
 
@@ -33,20 +35,28 @@ export default class Gym extends Room<GameState> {
         });
 
         this.onMessage(Message.TrainerBattle, (client: Client) => {
-            console.log("fight message");
-            
-            this.dispatcher.dispatch(new DetermineWinnerCommand(), {client: client});
+
+            this.dispatcher.dispatch(new DetermineWinnerCommand(), { client: client });
+        })
+
+        this.onMessage(Message.TieBreakerBattle, (client: Client, message: { index: number }) => {
+            if (!this.state.doneFighting.get(client.sessionId))
+                this.dispatcher.dispatch(new TieBreakerCommand(), { client: client, index: message.index });
         })
     }
     onJoin(client: Client, options: any) {
 
         this.state.trainers.set(client.sessionId, new Trainer(client.sessionId));
         //Deal 5 cards
-        console.log(`${client.sessionId} joined!`);
+        const trainer = this.state.trainers.get(client.sessionId);
+        this.dealCards(trainer.pokeCards, 5);
+        let s = "";
+        for (let i = 0; i < trainer.pokeCards.length; i++) {
+            const card = trainer.pokeCards[i];
+            s += `${card.suite}:${card.value} `
 
-        const currentTrainer = this.state.trainers.get(client.sessionId);
-        this.dealCards(currentTrainer.pokeCards, 5);
-        console.log(this.state.pickupPile.length);
+        }
+        console.log(`${client.sessionId} joined! pokeCards: ${s}`);
 
     }
 

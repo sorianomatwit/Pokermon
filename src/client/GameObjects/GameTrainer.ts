@@ -24,20 +24,7 @@ export default class GameTrainer {
     get sessionId(): string {
         return this.trainer.id;
     }
-    setScene(scene: Phaser.Scene) {
-        this.scene = scene;
-        this.setTrainer(this.trainer);
-        const allCards: GameCard[] = [
-            ...this.pokeCards,
-            ...this.pokerHand,
-            ...this.cardsInPlay
-        ];
 
-        for (let i = 0; i < allCards.length; i++) {
-            const card = allCards[i];
-            card.updateScene(scene);
-        }
-    }
     setTrainer(trainer: Trainer) {
         this.trainer = trainer;
         this.state = trainer.state;
@@ -58,14 +45,14 @@ export default class GameTrainer {
 
     private addToHand(serverHand: ArraySchema<Card>, clientHand: GameCard[]) {
         serverHand.forEach((c: Card, index: number) => {
+            if(clientHand[index]) clientHand[index].sprite.destroy();
             clientHand[index] = new GameCard(this.scene, c);
         });
     }
     private setHand(serverHand: ArraySchema<Card>, clientHand: GameCard[]) {
         for (let i = clientHand.length - 1; i >= 0; i--) {
             if (i < serverHand.length) {
-                const c = clientHand[i];
-                c.setCard(serverHand[i]);
+                clientHand[i].setCard(serverHand[i]);
             } else {
                 //TODO don't destroy image have it move position but still remove it from array   
                 clientHand[i].sprite.destroy();

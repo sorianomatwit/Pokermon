@@ -12,27 +12,20 @@ type Payload = {
 export default class SwappingPokeCard extends Command<Gym, Payload> {
 
     execute(data: Payload) {
-
         const { client, bool } = data;
-        const currentTrainer = this.state.trainers.get(client.sessionId);
-        if (!currentTrainer) return;
-
+        const trainer = this.state.trainers.get(client.sessionId);
+        if (!trainer) return;
         if (bool) {
-            console.log("swapping");
-            const temp = currentTrainer.cardsInPlay[0];
-
-            temp.isRevealedToClient = false;
-            temp.isRevealedToEveryone = false;
-            currentTrainer.cardsInPlay[InPlay.BATTLE] = currentTrainer.cardsInPlay[1];
-            currentTrainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = true;
-            currentTrainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = false;
-            currentTrainer.cardsInPlay[InPlay.SUMONE] = temp;
+            const temp = trainer.cardsInPlay[InPlay.BATTLE];
+            trainer.cardsInPlay[InPlay.BATTLE] = trainer.cardsInPlay[1];
+            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = true;
+            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = false;
+            trainer.cardsInPlay[InPlay.SUMONE] = temp;
+            trainer.cardsInPlay[InPlay.SUMONE].isRevealedToEveryone = false;
         }
-        currentTrainer.cardsInPlay[InPlay.BATTLE].placement = InPlay.BATTLE;
-        currentTrainer.cardsInPlay[InPlay.SUMONE].placement = InPlay.SUMONE;
-        this.room.dispatcher.dispatch(new CalculateSumCommand(), {
-            cards: currentTrainer.cardsInPlay,
-            sessionId: client.sessionId
-        })
+        trainer.cardsInPlay[InPlay.BATTLE].placement = InPlay.BATTLE;
+        trainer.cardsInPlay[InPlay.SUMONE].placement = InPlay.SUMONE;
+        this.room.dispatcher.dispatch(new CalculateSumCommand(), {client: client})
+
     }
 }

@@ -9,6 +9,7 @@ export enum Message {
     SelectPokeCard = 'SelectPokeCard',
     SwapPokeCard = 'SwapPokeCard',
     TrainerBattle = 'TrainerBattle',
+    TieBreakerBattle = 'TieBreakerBattle',
     ChampionsBattle = 'ChampionsBattle',
     DiscardDraft = 'DiscardDraft',
     PokerDraft = 'PokerDraft'

@@ -12,7 +12,7 @@ export enum ServerEvents {
 export default class Server {
     private client: Client;
     private events: Phaser.Events.EventEmitter;
-    private room?: Room<IGameState & Schema>;
+    public room!: Room<IGameState & Schema>;
     public sessionId?: string;
     constructor() {
         this.client = new Client('http://localhost:2567');
@@ -47,16 +47,21 @@ export default class Server {
         this.room.send(Message.SelectPokeCard, payload);
     }
 
-    public SwapWithHidden(payload: { swap: boolean }){
+    public swapWithHidden(payload: { swap: boolean }){
         if (!this.room) return;
         this.room.send(Message.SwapPokeCard, payload);
     }
 
-    public fight() {
-        console.log("fight");
+    public fight(i: number) {
+        console.log(`fight ${i}`);
         
         if (!this.room) return;
         this.room.send(Message.TrainerBattle);
+    }
+
+    public tieBreaker(payload: {index: number}){
+        if (!this.room) return;
+        this.room.send(Message.TieBreakerBattle, payload)
     }
 
 }

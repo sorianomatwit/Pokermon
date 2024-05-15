@@ -1,7 +1,7 @@
 import GameCard from './GameCard';
 import GameTrainer from './GameTrainer';
 import { cardWidth, ScreenOrientation, TrainerOrientation } from './GameConst';
-import { TrainerField } from "../../server/src/rooms/schema/Trainer";
+import { Trainer, TrainerField } from "../../server/src/rooms/schema/Trainer";
 import { Scene } from "phaser";
 
 export function getOrientation(
@@ -98,10 +98,10 @@ export function drawCards(isClient: boolean, orientation: TrainerOrientation, ca
             xPlacement = 0;
             yPlacement = (cardWidth + buffer) * card.cardData.placement;
         }
-        card.show(card.cardData.isRevealedToEveryone);
-        if (isClient) {
-            card.show(card.cardData.isRevealedToClient);
-        }
+        const showCard = (card.cardData.isRevealedToEveryone) || (isClient && card.cardData.isRevealedToClient)
+        
+        card.show(showCard);
+        
         card.sprite.setInteractive();
 
         card.setPosition(
@@ -109,5 +109,9 @@ export function drawCards(isClient: boolean, orientation: TrainerOrientation, ca
             Math.floor(yPosition + yPlacement)
         )
     }
+}
+
+export function triggerCallbackAfterDelay(callback: () => void, delayInSeconds: number): void {
+    setTimeout(callback, delayInSeconds * 1000); // Convert seconds to milliseconds
 }
 

@@ -7,16 +7,16 @@ import SetOpponentsCommand from './SetOpponentsCommand';
 import { InPlay } from '../../SharedTypes/Enums';
 
 type Payload = {
-    sessionId: string,
-    cards: ArraySchema<Card>
+    client: Client,
 }
 
 export default class CalculateSumCommand extends Command<Gym, Payload> {
-
+    
     execute(data: Payload) {
-        const { sessionId, cards } = data;
+        const { client } = data;
+        const cards = this.state.trainers.get(client.sessionId).cardsInPlay;
         this.state.trainerSums.set(
-            sessionId,
+            client.sessionId,
             cards[InPlay.SUMONE].value + cards[InPlay.SUMTWO].value
         )
         if (this.state.trainerSums.size == this.state.trainers.size) {

@@ -15,7 +15,8 @@ export enum TrainerState {
 export enum TrainerField {
     pokerHand = 'pokerHand',
     pokeCards = 'pokeCards',
-    cardsInPlay = 'cardsInPlay'
+    cardsInPlay = 'cardsInPlay',
+    state = 'state'
 }
 export class Trainer extends Schema {
     @type([Card]) public pokerHand: ArraySchema<Card>;
@@ -24,6 +25,7 @@ export class Trainer extends Schema {
     @type('string') public state: TrainerState;
     @type('string') public opponentId: string; 
     @type('string') public id: string;
+    @type('boolean') public isReadyToFight = false;
 
     constructor(id: string) {
         super();
