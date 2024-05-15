@@ -19,10 +19,7 @@ export default class SetOpponentsCommand extends Command<Gym> {
         for (let k = 0; k < keys.length; k++) {
             const key = keys[k];
             let val = (k > 1) ? 1 : 0;
-            this.state.trainerDraftOrder.set(key, val);
-            console.log(`${key} going ${val} with ${this.state.trainerSums.get(key)}`);
-            
-
+            this.state.trainerRankings.set(key, val);
         }
         //Swap if tie (3rd and 2nd)
         const thirdPlace = 1;
@@ -51,9 +48,9 @@ export default class SetOpponentsCommand extends Command<Gym> {
             const trainer = trainers.get(key)!;
             const opponent = trainers.get(oppKey)!;
             trainer.opponentId = oppKey;
-            trainer.state = TrainerState.BASE_BATTLE;
+            trainer.setState(TrainerState.BASE_BATTLE);
             opponent.opponentId = key;
-            opponent.state = TrainerState.BASE_BATTLE;
+            opponent.setState(TrainerState.BASE_BATTLE);
             trainer.isReadyToFight = true;
             opponent.isReadyToFight = true;
             this.state.resetAllCardsVisibility(key);

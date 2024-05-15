@@ -9,8 +9,10 @@ export default class GameTrainer {
     public cardsInPlay: GameCard[] = [];
     public state: TrainerState = TrainerState.CHOOSE;
     public opponentId: string = "";
+    public isReadyToFight = false;
     constructor(private scene: Phaser.Scene, private trainer: Trainer) {
         this.state = trainer.state;
+        this.isReadyToFight = trainer.isReadyToFight;
         trainer.pokeCards.forEach((c: Card, index: number) => {
             this.pokeCards[index] = new GameCard(this.scene, c);
         });
@@ -28,6 +30,8 @@ export default class GameTrainer {
     setTrainer(trainer: Trainer) {
         this.trainer = trainer;
         this.state = trainer.state;
+        this.isReadyToFight = trainer.isReadyToFight;
+
         this.opponentId = trainer.opponentId;
         if (trainer.pokeCards.length > this.pokeCards.length)
             this.addToHand(trainer.pokeCards, this.pokeCards);

@@ -11,9 +11,9 @@ import SetChampionOpponentsCommand from './SetChampionOpponentsCommand';
 type Payload = {
     client: Client
 }
-let fightCount = 0; 
+let fightCount = 0;
 export default class DetermineWinnerCommand extends Command<Gym, Payload> {
-    
+
     private determinePower(clientCard: Card, opponentCard: Card): number {
         let clientHasAdvantage: boolean =
             (clientCard.suite == Suite.ELECTRIC && opponentCard.suite == Suite.FLYING) ||
@@ -25,11 +25,14 @@ export default class DetermineWinnerCommand extends Command<Gym, Payload> {
     }
 
     execute(data: Payload) {
-        fightCount++;
         const { client } = data;
         const trainer = this.state.trainers.get(client.sessionId);
         const opponent = this.state.trainers.get(trainer.opponentId);
-
+        if (trainer.state == TrainerState.DELETE) {
+            console.log(`triggered battle even tho finished ${client.sessionId} ${this.state.doneFighting.get(client.sessionId)}`);
+            return;
+        }
+        fightCount++;
         let clientCard = trainer.cardsInPlay[InPlay.BATTLE];
         let opponentCard = opponent.cardsInPlay[InPlay.BATTLE];
 
@@ -42,45 +45,34 @@ export default class DetermineWinnerCommand extends Command<Gym, Payload> {
         console.log(`${trainer.id} v ${opponent.id} ${hasClientWon}`);
 
         if (hasClientWon) {
-            if (trainer.state == TrainerState.TIEBREAKER) {
-                if (this.state.doneFighting.has(client.sessionId)) {
-                    trainer.state = TrainerState.CHAMPION_BATTLE;
-                } else {
-                    trainer.state = TrainerState.BASE_BATTLE;
-                }
-            }
-
 
             if (trainer.state == TrainerState.BASE_BATTLE) {
-                trainer.state = TrainerState.CHAMPION_BATTLE;
+                trainer.setState(TrainerState.CHAMPION_BATTLE);
 
                 this.room.dispatcher.dispatch(new SetChampionOpponentsCommand(), { client: client })
             } else {
-                let val = this.state.trainerDraftOrder.get(client.sessionId) + 1;
-                this.state.trainerDraftOrder.set(client.sessionId, val);
-                console.log(`${client.sessionId} is the grand winner`);
-                trainer.state = TrainerState.DELETE;
-                this.state.doneFighting.set(client.sessionId, true);
+                let val = this.state.trainerRankings.get(client.sessionId) + 1;
+                this.state.trainerRankings.set(client.sessionId, val);
+                trainer.setState(TrainerState.DELETE);
             }
         } else if (clientPower == opponentPower) {
-            trainer.state = TrainerState.TIEBREAKER;
             this.room.dispatcher.dispatch(new SetupTieBreakerCommand(), { client: client });
             return;
         } else {
-            trainer.state = TrainerState.DELETE;
-            this.state.doneFighting.set(client.sessionId, true);
+            trainer.setState(TrainerState.DELETE);
         }
+        //@ts-expect-error
+        let outcome = trainer.state == TrainerState.DELETE;
+        this.state.doneFighting.set(client.sessionId, outcome);
 
-        let allDone = true;
+        let count = 0;
         for (const [key, value] of this.state.doneFighting) {
-            console.log(`${key} done ${value}`);
-            
-            allDone &&= value;
+            if (value) count++;
         }
-        if(allDone){
+        if (count == this.state.trainers.size) {
             console.log(fightCount);
-            
-            this.room.dispatcher.dispatch(new GatherDraftCardsCommand(), {client: client});
+
+            this.room.dispatcher.dispatch(new GatherDraftCardsCommand(), { client: client });
         }
     }
 }

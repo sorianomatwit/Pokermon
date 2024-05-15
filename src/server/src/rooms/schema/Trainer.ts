@@ -22,6 +22,7 @@ export class Trainer extends Schema {
     @type([Card]) public pokerHand: ArraySchema<Card>;
     @type([Card]) public pokeCards: ArraySchema<Card>;
     @type([Card]) public cardsInPlay: ArraySchema<Card>;
+    @type('string') public previousState: TrainerState;
     @type('string') public state: TrainerState;
     @type('string') public opponentId: string; 
     @type('string') public id: string;
@@ -34,6 +35,12 @@ export class Trainer extends Schema {
         this.pokeCards = new ArraySchema<Card>();
         this.cardsInPlay = new ArraySchema<Card>();
         this.state = TrainerState.CHOOSE;
+        this.previousState = TrainerState.CHOOSE;
         this.opponentId = "";
+    }
+
+    setState(newState: TrainerState){
+        this.previousState = this.state;
+        this.state = newState;
     }
 }

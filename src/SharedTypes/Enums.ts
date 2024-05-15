@@ -11,8 +11,8 @@ export enum Message {
     TrainerBattle = 'TrainerBattle',
     TieBreakerBattle = 'TieBreakerBattle',
     ChampionsBattle = 'ChampionsBattle',
-    DiscardDraft = 'DiscardDraft',
-    PokerDraft = 'PokerDraft'
+    DeleteCard = 'DeleteCard',
+    DraftCard = 'DraftCard'
 }
 export enum InPlay {
     BATTLE = 0,

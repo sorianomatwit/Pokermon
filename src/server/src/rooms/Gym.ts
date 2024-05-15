@@ -10,6 +10,8 @@ import { Card } from './schema/Card';
 import DetermineWinnerCommand from '../../commands/DetermineWinnerCommand';
 import SetupTieBreakerCommand from '../../commands/setupTieBreakerCommand';
 import TieBreakerCommand from '../../commands/TieBreakerCommand';
+import DeleteCommand from '../../commands/DeleteCommand';
+import DraftCommand from '../../commands/DraftCommand';
 
 export default class Gym extends Room<GameState> {
     public dispatcher = new Dispatcher(this);
@@ -40,8 +42,16 @@ export default class Gym extends Room<GameState> {
         })
 
         this.onMessage(Message.TieBreakerBattle, (client: Client, message: { index: number }) => {
-            if (!this.state.doneFighting.get(client.sessionId))
-                this.dispatcher.dispatch(new TieBreakerCommand(), { client: client, index: message.index });
+            this.dispatcher.dispatch(new TieBreakerCommand(), { client: client, index: message.index });
+        })
+
+        this.onMessage(Message.DeleteCard, (client: Client, message: { index: number }) => {
+            this.dispatcher.dispatch(new DeleteCommand(), { client: client, index: message.index });
+        })
+        this.onMessage(Message.DraftCard, (client: Client, message: { index: number }) => {
+            console.log("draft");
+            
+            this.dispatcher.dispatch(new DraftCommand(), { client: client, index: message.index });
         })
     }
     onJoin(client: Client, options: any) {

@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import type Server from '../services/Server';
 import { IGameState } from '../../server/src/rooms/schema/GameState';
 import GameTrainer from '../GameObjects/GameTrainer';
-import { cardWidth, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation } from '../GameObjects/GameConst';
+import { cardHeight, cardWidth, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation } from '../GameObjects/GameConst';
 import { drawAllCards, drawCards, getCards, getOrientation, triggerCallbackAfterDelay } from '../GameObjects/GameUtils';
 import { TrainerField, TrainerState, Trainer } from '../../server/src/rooms/schema/Trainer';
 import { InPlay } from '../../SharedTypes/Enums';
@@ -111,8 +111,13 @@ export default class Game extends Phaser.Scene {
                 this.drawTieBreakerScreen(this.server.sessionId);
                 break;
             case TrainerState.DELETE:
+                console.log(`${this.server.sessionId} goes ${state.trainerRankings.get(this.server.sessionId)}`);
+
+                this.drawDeleteScreen(this.server.sessionId)
                 break;
             case TrainerState.DRAFT:
+                this.drawDraftScreen(this.server.sessionId);
+                break;
             default:
                 break;
         }
@@ -123,7 +128,7 @@ export default class Game extends Phaser.Scene {
         if (trainers.size > this.allGameTrainers.size) {
             for (const [key, trainer] of trainers) {
                 if (this.allGameTrainers.has(key)) {
-                    this.allGameTrainers.get(key)?.setTrainer(trainer); 
+                    this.allGameTrainers.get(key)?.setTrainer(trainer);
 
                 } else {
                     this.allGameTrainers.set(key, new GameTrainer(this, trainer));
@@ -239,19 +244,28 @@ export default class Game extends Phaser.Scene {
 
     }
 
-    drawDeleteScreen() {
+    drawDeleteScreen(sessionId: string) {
         //draw  
+        console.log("delete");
         const buffer = 5;
         const { width, height } = this.scale;
-        let xPosition = (width / 2) - (cardWidth * 3/2);
-        let yPosition = (height / 2);
+        const orientation = getOrientation(
+            ScreenOrientation.BOTTOM,
+            1,
+            .5,
+            .85,
+            width,
+            height
+        );
+        let xPosition = (width / 2) - ((cardWidth + buffer) * 3 / 2);
+        let yPosition = (height / 2) - ((cardHeight + buffer) * Math.floor(this.gameDraftPile.length / 3)) / 2;
+        drawCards(true, orientation, this.trainer.pokerHand, 10)
         for (let i = 0; i < this.gameDraftPile.length; i++) {
-            console.log("hello");
-            
             const card = this.gameDraftPile[i];
+            card.sprite.visible = true;
 
-            let xPlacement = (cardWidth + buffer) * card.cardData.placement;
-            let yPlacement = 0;
+            let xPlacement = (cardWidth + buffer) * (card.cardData.placement % 3);
+            let yPlacement = Math.floor(card.cardData.placement / 3) * (cardHeight + buffer);
 
             card.sprite.setInteractive();
 
@@ -260,7 +274,48 @@ export default class Game extends Phaser.Scene {
                 Math.floor(yPosition + yPlacement)
             )
 
+            //add input
+            card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
+                this.server?.deleteCard({ index: i });
+            })
+
         }
-        //add input
+    }
+    drawDraftScreen(sessionId: string) {
+        //draw  
+        console.log("draft");
+        const buffer = 5;
+        const { width, height } = this.scale;
+        const orientation = getOrientation(
+            ScreenOrientation.BOTTOM,
+            1,
+            .5,
+            .85,
+            width,
+            height
+        );
+        let xPosition = (width / 2) - ((cardWidth + buffer) * 3 / 2);
+        let yPosition = (height / 2) - ((cardHeight + buffer) * Math.floor(this.gameDraftPile.length / 3)) / 2;
+        drawCards(true, orientation, this.trainer.pokerHand, 10)
+        for (let i = 0; i < this.gameDraftPile.length; i++) {
+            const card = this.gameDraftPile[i];
+            card.sprite.visible = true;
+
+            let xPlacement = (cardWidth + buffer) * (card.cardData.placement % 3);
+            let yPlacement = Math.floor(card.cardData.placement / 3) * (cardHeight + buffer);
+
+            card.sprite.setInteractive();
+
+            card.setPosition(
+                Math.floor(xPosition + xPlacement),
+                Math.floor(yPosition + yPlacement)
+            )
+
+            //add input
+            card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
+                this.server?.draftCard({index: i});
+            })
+
+        }
     }
 }

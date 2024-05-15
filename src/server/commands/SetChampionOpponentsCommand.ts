@@ -17,8 +17,8 @@ export default class SetChampionOpponentsCommand extends Command<Gym, Payload> {
             this.state.trainers.get(p1).opponentId = p2;
             this.state.trainers.get(p2).opponentId = p1;
             this.state.championsIds.clear();
-            this.state.trainerDraftOrder.set(p1, 2);
-            this.state.trainerDraftOrder.set(p2, 2);
+            this.state.trainerRankings.set(p1, 2);
+            this.state.trainerRankings.set(p2, 2);
         }
     }
 }

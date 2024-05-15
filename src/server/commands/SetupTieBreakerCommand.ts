@@ -19,7 +19,7 @@ export default class SetupTieBreakerCommand extends Command<Gym, Payload> {
         if (!trainer) return;
         this.room.state.resetAllCardsVisibility(client.sessionId);
 
-        trainer.state = TrainerState.TIEBREAKER;
+        trainer.setState(TrainerState.TIEBREAKER);
         for (let i = 0; i < trainer.cardsInPlay.length; i++) {
             trainer.cardsInPlay[i].isRevealedToClient = true;
             trainer.cardsInPlay[i].placement = i;

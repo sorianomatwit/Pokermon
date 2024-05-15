@@ -17,6 +17,6 @@ export default class DealSumCardsCommand extends Command<Gym, Payload> {
         this.room.dealCards(trainer.cardsInPlay, 2);
         trainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = true;
         trainer.cardsInPlay[InPlay.SUMTWO].isRevealedToEveryone = true;
-        trainer.state = TrainerState.SWAP;
+        trainer.setState(TrainerState.SWAP);
     }
 }

@@ -64,4 +64,14 @@ export default class Server {
         this.room.send(Message.TieBreakerBattle, payload)
     }
 
+    public deleteCard(payload: {index: number}){
+        if (!this.room) return;
+        this.room.send(Message.DeleteCard, payload)
+    }
+    public draftCard(payload: {index: number}){
+        if (!this.room) return;
+        this.room.send(Message.DraftCard, payload)
+    }
+
+
 }

@@ -7,6 +7,8 @@ export type TrainerOrientation = {
 }
 
 export const cardWidth = 67;
+export const cardHeight = 93;
+
 
 export const GAMEOBJECT_POINTER_UP = Phaser.Input.Events.GAMEOBJECT_POINTER_UP;
     

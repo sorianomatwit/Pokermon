@@ -9,7 +9,7 @@ export interface IGameState {
     pickupPile: ArraySchema<Card>;
     trainers: MapSchema<Trainer>;
     draftPile: ArraySchema<Card>;
-    trainerDraftOrder: MapSchema<number>;
+    trainerRankings: MapSchema<number>;
     activePlayer: string;
     doneFighting: MapSchema<boolean>;
 
@@ -25,12 +25,13 @@ export default class GameState extends Schema implements IGameState {
     @type([Card]) pickupPile: ArraySchema<Card>;
     @type({ map: Trainer }) trainers: MapSchema<Trainer>;
     @type({ map: 'boolean' }) doneFighting: MapSchema<boolean>;
-    @type({ map: 'number' }) trainerDraftOrder: MapSchema<number>;
+    @type({ map: 'number' }) trainerRankings: MapSchema<number>;
     @type([Card]) draftPile: ArraySchema<Card>;
     @type('string') activePlayer: string;
 
     @type({ map: 'number' }) trainerSums: MapSchema<number>;
     @type(['string']) championsIds: ArraySchema<string>;
+    @type(['string']) pickOrder: ArraySchema<string>;
 
 
     constructor() {
@@ -39,13 +40,14 @@ export default class GameState extends Schema implements IGameState {
         this.pickupPile = new ArraySchema<Card>();
         this.draftPile = new ArraySchema<Card>();
         this.trainers = new MapSchema<Trainer>();
-        this.trainerDraftOrder = new MapSchema<number>();
+        this.trainerRankings = new MapSchema<number>();
         this.doneFighting = new MapSchema<boolean>();
 
         this.trainerSums = new MapSchema<number>();
         this.championsIds = new ArraySchema<string>();
 
         this.activePlayer = "";
+        this.pickOrder = new ArraySchema<string>(...["","","",""]);
 
         //initialize Deck
         let k = 2
