@@ -1,8 +1,7 @@
-import { Suite } from "../../../../SharedTypes/Enums";
 import { Schema, type } from '@colyseus/schema';
+import { Suite } from '../../../../Const';
 
-
-export class Card extends Schema {
+export default class Card extends Schema {
     @type('boolean') public isRevealedToEveryone: boolean;
     @type('boolean') public isRevealedToClient: boolean;
     @type('string') public imageString: string;

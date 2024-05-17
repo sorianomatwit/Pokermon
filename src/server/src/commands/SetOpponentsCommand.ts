@@ -1,8 +1,6 @@
-import { Client } from 'colyseus';
-import Gym from '../src/rooms/Gym';
 import { Command } from '@colyseus/command';
-import { TrainerState } from '../src/rooms/schema/Trainer';
-import { InPlay } from '../../SharedTypes/Enums';
+import Gym from '../rooms/Gym';
+import { InPlay, TrainerState } from '../../../Const';
 
 
 export default class SetOpponentsCommand extends Command<Gym> {

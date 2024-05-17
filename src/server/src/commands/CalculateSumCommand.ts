@@ -1,14 +1,10 @@
-import Gym from '../src/rooms/Gym';
 import { Command } from '@colyseus/command';
-import { ArraySchema } from '@colyseus/schema';
-import { Card } from '../src/rooms/schema/Card';
-import { Client } from 'colyseus';
 import SetOpponentsCommand from './SetOpponentsCommand';
-import { InPlay } from '../../SharedTypes/Enums';
+import { type Payload } from '../ServerUtils';
+import type Gym from '../rooms/Gym';
+import { InPlay } from '../../../Const';
 
-type Payload = {
-    client: Client,
-}
+
 
 export default class CalculateSumCommand extends Command<Gym, Payload> {
     

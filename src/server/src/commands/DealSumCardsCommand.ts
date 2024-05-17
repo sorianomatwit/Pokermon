@@ -1,12 +1,8 @@
 import { Command } from "@colyseus/command";
-import Gym from "../src/rooms/Gym";
-import { Trainer, TrainerState } from "../src/rooms/schema/Trainer";
-import { InPlay } from "../../SharedTypes/Enums";
-import { Client } from "colyseus";
+import { type Payload } from "../ServerUtils";
+import type Gym from "../rooms/Gym";
+import { InPlay, TrainerState } from "../../../Const";
 
-type Payload = {
-    client: Client
-}
 
 export default class DealSumCardsCommand extends Command<Gym, Payload> {
     execute(data: Payload) {

@@ -1,17 +1,15 @@
-import { Client } from "colyseus";
-import Gym from "../src/rooms/Gym";
 import { Command } from "@colyseus/command";
 import CalculateSumCommand from "./CalculateSumCommand";
-import { InPlay } from "../../SharedTypes/Enums";
+import Gym from "../rooms/Gym";
+import { InPlay } from "../../../Const";
+import { Payload } from "../ServerUtils";
 
-type Payload = {
-    client: Client,
-
+type boolPayload = Payload & {
     bool: boolean
 }
-export default class SwappingPokeCard extends Command<Gym, Payload> {
+export default class SwappingPokeCard extends Command<Gym, boolPayload> {
 
-    execute(data: Payload) {
+    execute(data: boolPayload) {
         const { client, bool } = data;
         const trainer = this.state.trainers.get(client.sessionId);
         if (!trainer) return;

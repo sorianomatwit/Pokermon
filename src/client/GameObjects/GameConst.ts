@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 export type TrainerOrientation = {
     xPosition: number,
     yPosition: number,
@@ -11,7 +10,7 @@ export const cardHeight = 93;
 
 
 export const GAMEOBJECT_POINTER_UP = Phaser.Input.Events.GAMEOBJECT_POINTER_UP;
-    
+
 export enum ScreenOrientation {
     LEFT = 0,
     TOP = 1,
@@ -22,4 +21,11 @@ export enum ScreenOrientation {
 export enum GameScenes {
     GAME = 'game',
     BOOTSTRAP = 'bootstrap',
+}
+
+export enum TrainerField {
+    pokerHand = 'pokerHand',
+    pokeCards = 'pokeCards',
+    cardsInPlay = 'cardsInPlay',
+    state = 'state'
 }

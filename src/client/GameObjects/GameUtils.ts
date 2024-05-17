@@ -1,7 +1,6 @@
 import GameCard from './GameCard';
 import GameTrainer from './GameTrainer';
-import { cardWidth, ScreenOrientation, TrainerOrientation } from './GameConst';
-import { Trainer, TrainerField } from "../../server/src/rooms/schema/Trainer";
+import { cardWidth, ScreenOrientation, TrainerField, TrainerOrientation } from './GameConst';
 import { Scene } from "phaser";
 
 export function getOrientation(

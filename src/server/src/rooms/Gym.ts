@@ -1,21 +1,19 @@
 import { Client, Room } from 'colyseus';
 import GameState from './schema/GameState';
 import { Dispatcher } from '@colyseus/command';
-import { Message } from '../../../SharedTypes/Enums';
 import { ArraySchema } from '@colyseus/schema';
-import SelectPokeCardCommand from '../../commands/SelectPokeCardCommand';
-import SwappingPokeCard from '../../commands/SwappingCardCommand';
-import { Trainer } from './schema/Trainer';
-import { Card } from './schema/Card';
-import DetermineWinnerCommand from '../../commands/DetermineWinnerCommand';
-import SetupTieBreakerCommand from '../../commands/setupTieBreakerCommand';
-import TieBreakerCommand from '../../commands/TieBreakerCommand';
-import DeleteCommand from '../../commands/DeleteCommand';
-import DraftCommand from '../../commands/DraftCommand';
+import Trainer from './schema/Trainer';
+import Card from './schema/Card';
+import { Message } from '../../../Const';
+import DraftCommand from '../commands/DraftCommand';
+import SwappingPokeCard from '../commands/SwappingCardCommand';
+import TieBreakerCommand from '../commands/TieBreakerCommand';
+import SelectPokeCardCommand from '../commands/SelectPokeCardCommand';
+import DetermineBattleCommand from '../commands/DetermineBattleCommand';
+import DeleteCommand from '../commands/DeleteCommand';
 
 export default class Gym extends Room<GameState> {
     public dispatcher = new Dispatcher(this);
-
     onCreate(): void | Promise<any> {
         this.maxClients = 4;
         this.setState(new GameState());
@@ -25,7 +23,7 @@ export default class Gym extends Room<GameState> {
         this.onMessage(Message.SelectPokeCard, (client: Client, message: { index: number }) => {
             this.dispatcher.dispatch(new SelectPokeCardCommand(), {
                 client: client,
-                num: message.index
+                index: message.index
             })
         });
 
@@ -38,7 +36,7 @@ export default class Gym extends Room<GameState> {
 
         this.onMessage(Message.TrainerBattle, (client: Client) => {
 
-            this.dispatcher.dispatch(new DetermineWinnerCommand(), { client: client });
+            this.dispatcher.dispatch(new DetermineBattleCommand(), { client: client });
         })
 
         this.onMessage(Message.TieBreakerBattle, (client: Client, message: { index: number }) => {
@@ -50,13 +48,14 @@ export default class Gym extends Room<GameState> {
         })
         this.onMessage(Message.DraftCard, (client: Client, message: { index: number }) => {
             console.log("draft");
-            
+
             this.dispatcher.dispatch(new DraftCommand(), { client: client, index: message.index });
         })
     }
     onJoin(client: Client, options: any) {
 
-        this.state.trainers.set(client.sessionId, new Trainer(client.sessionId));
+        this.state.trainers.set(client.sessionId, new Trainer(client.sessionId)); 
+        this.state.pickOrder.push("");
         //Deal 5 cards
         const trainer = this.state.trainers.get(client.sessionId);
         this.dealCards(trainer.pokeCards, 5);
@@ -64,7 +63,6 @@ export default class Gym extends Room<GameState> {
         for (let i = 0; i < trainer.pokeCards.length; i++) {
             const card = trainer.pokeCards[i];
             s += `${card.suite}:${card.value} `
-
         }
         console.log(`${client.sessionId} joined! pokeCards: ${s}`);
 
@@ -78,6 +76,8 @@ export default class Gym extends Room<GameState> {
         this.retrieveAllCards(currentTrainer.cardsInPlay);
 
         this.state.trainers.delete(client.sessionId);
+        this.state.pickOrder.pop();
+
     }
 
     onDispose() {

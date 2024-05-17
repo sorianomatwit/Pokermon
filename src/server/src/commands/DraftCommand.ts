@@ -1,15 +1,13 @@
-import { Client } from 'colyseus';
-import Gym from '../src/rooms/Gym';
 import { Command } from '@colyseus/command';
-import { TrainerState } from '../src/rooms/schema/Trainer';
+import DetermineWinnerCommand from './DetermineWinnerCommand';
+import type Gym from '../rooms/Gym';
+import { TrainerState } from '../../../Const';
+import { type PayloadIndex } from '../ServerUtils';
 
-type Payload = {
-    client: Client,
-    index: number
-}
-export default class DraftCommand extends Command<Gym, Payload> {
 
-    execute(data: Payload) {
+export default class DraftCommand extends Command<Gym, PayloadIndex> {
+
+    execute(data: PayloadIndex) {
         const { client, index } = data;
         const trainerRank = this.state.trainerRankings.get(client.sessionId)!;
         const trainer = this.state.trainers.get(client.sessionId);
@@ -24,8 +22,8 @@ export default class DraftCommand extends Command<Gym, Payload> {
 
             if (nextIndex >= 0) {
                 this.state.activePlayer = this.state.pickOrder[nextIndex];
-            } else {
-                for (let i = this.state.draftPile.length  - 1; i >= 0; i--) {
+            } else if (trainer.pokerHand.length < 5) {
+                for (let i = this.state.draftPile.length - 1; i >= 0; i--) {
                     const dCard = this.state.draftPile[i]
                     dCard.isRevealedToClient = false;
                     dCard.isRevealedToEveryone = false;
@@ -33,8 +31,11 @@ export default class DraftCommand extends Command<Gym, Payload> {
                     this.state.draftPile.deleteAt(i)
                 }
                 for (const [_, trainer] of this.state.trainers) {
+                    trainer.cardsInPlay.clear();
                     trainer.setState(TrainerState.CHOOSE);
                 }
+            } else {
+                return new DetermineWinnerCommand()
             }
         } else console.error(`${client.sessionId}: ${index} doesn't exist active is ${this.state.activePlayer}`)
     }

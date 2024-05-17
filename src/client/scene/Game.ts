@@ -1,13 +1,13 @@
 import Phaser from 'phaser'
 import type Server from '../services/Server';
-import { IGameState } from '../../server/src/rooms/schema/GameState';
+import type IGameState from '../../server/src/rooms/schema/GameState';
 import GameTrainer from '../GameObjects/GameTrainer';
-import { cardHeight, cardWidth, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation } from '../GameObjects/GameConst';
+import { cardHeight, cardWidth, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation, TrainerField, type TrainerOrientation } from '../GameObjects/GameConst';
 import { drawAllCards, drawCards, getCards, getOrientation, triggerCallbackAfterDelay } from '../GameObjects/GameUtils';
-import { TrainerField, TrainerState, Trainer } from '../../server/src/rooms/schema/Trainer';
-import { InPlay } from '../../SharedTypes/Enums';
+import type Trainer from '../../server/src/rooms/schema/Trainer';
 import { MapSchema } from '@colyseus/schema';
 import GameCard from '../GameObjects/GameCard';
+import { InPlay, Message, TrainerState } from '../../Const';
 
 export default class Game extends Phaser.Scene {
 
@@ -15,8 +15,11 @@ export default class Game extends Phaser.Scene {
     private allGameTrainers: Map<string, GameTrainer> = new Map();
     private gameDraftPile: GameCard[] = [];
     private trainer!: GameTrainer;
+    private orientation!: TrainerOrientation;
+    private oppOrientation!: TrainerOrientation;
     constructor() {
         super({ key: GameScenes.GAME });
+
     }
 
     async create(data: { server: Server }) {
@@ -29,18 +32,27 @@ export default class Game extends Phaser.Scene {
 
         this.server.onceStateChanged(this.createGameScene, this);
         this.server.stateChanged(this.serverDataUpdate, this);
+        const { width, height } = this.scale;
+
+        this.orientation = getOrientation(
+            ScreenOrientation.BOTTOM,
+            1,
+            .5,
+            .85,
+            width,
+            height
+        );
+        this.oppOrientation = getOrientation(
+            ScreenOrientation.TOP,
+            1,
+            .5,
+            .85,
+            width,
+            height
+        );
     }
 
     update(_time: number, _delta: number): void {
-        // if (this.startCountingDown && this.trainer.state == TrainerState.CHAMPION_BATTLE) {
-        //     this.timer -= _delta / 1000;
-        //     console.log(this.timer);
-
-        //     if (this.timer <= 0) {
-        //         this.startCountingDown = false;
-        //         this.server?.fight();
-        //     }
-        // }
     }
     private createGameScene(state: IGameState) {
         if (!this.server?.sessionId) return;
@@ -60,25 +72,25 @@ export default class Game extends Phaser.Scene {
         if (!this.server?.sessionId) return;
         const { trainers, draftPile } = state;
         this.updateTrainers(trainers);
-        for (let i = 0; i < draftPile.length; i++) {
-            const card = draftPile[i];
-            if (this.gameDraftPile[i]) {
-                this.gameDraftPile[i].sprite.destroy();
-            }
-            this.gameDraftPile[i] = new GameCard(this, card);
-        }
-        // const cards = getCards(TrainerField.cardsInPlay, this.trainer); 
 
-        // if (cards.length > 0) {
-        //     console.log(`E0: ${cards[InPlay.BATTLE].cardData.isRevealedToEveryone}, 1: ${cards[InPlay.SUMONE].cardData.isRevealedToEveryone}, 2: ${cards[InPlay.SUMTWO].cardData.isRevealedToEveryone}`);
-        //     console.log(`C0: ${cards[InPlay.BATTLE].cardData.isRevealedToClient}, 1: ${cards[InPlay.SUMONE].cardData.isRevealedToClient}, 2: ${cards[InPlay.SUMTWO].cardData.isRevealedToClient}`);
-        // }
-        // const serverTrainer = state.trainers.get(this.server.sessionId);
-        // if (serverTrainer && serverTrainer?.cardsInPlay.length > 0) {
-        //     console.log(`SE0: ${serverTrainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone}, 1: ${serverTrainer.cardsInPlay[InPlay.SUMONE].isRevealedToEveryone}, 2: ${serverTrainer.cardsInPlay[InPlay.SUMTWO].isRevealedToEveryone}`);
-        //     console.log(`SC0: ${serverTrainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient}, 1: ${serverTrainer.cardsInPlay[InPlay.SUMONE].isRevealedToClient}, 2: ${serverTrainer.cardsInPlay[InPlay.SUMTWO].isRevealedToClient}`);
-        // } else if(!serverTrainer) console.error("no trainer");
-        //resetInput on all cards
+        if (draftPile.length > this.gameDraftPile.length) {
+            for (let k = 0; k < draftPile.length; k++) {
+                const card = draftPile[k];
+                if (k >= this.gameDraftPile.length) {
+                    this.gameDraftPile[k] = new GameCard(this, card);
+                }
+            }
+        } else {
+            for (let j = this.gameDraftPile.length - 1; j >= 0; j--) {
+                if (j < draftPile.length) {
+                    const card = draftPile[j];
+                    this.gameDraftPile[j].setCard(card);
+                } else {
+                    this.gameDraftPile[j].sprite.destroy();
+                    this.gameDraftPile.splice(j, 1);
+                }
+            }
+        }
         for (const [_, gameTrainer] of this.allGameTrainers) {
             const allCards = [
                 ...this.gameDraftPile,
@@ -89,6 +101,10 @@ export default class Game extends Phaser.Scene {
             for (let i = 0; i < allCards.length; i++) {
                 const card = allCards[i];
                 card.sprite.off(GAMEOBJECT_POINTER_UP);
+                //TESTING
+                card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
+                    console.log(`${card.cardData.value} ${card.cardData.suite} ${_}`);
+                })
                 card.sprite.visible = false;
             }
         }
@@ -104,19 +120,27 @@ export default class Game extends Phaser.Scene {
                 break;
             case TrainerState.BASE_BATTLE:
             case TrainerState.CHAMPION_BATTLE:
-                if (!state.doneFighting.get(this.server.sessionId))
-                    this.drawBattleScreen(this.server.sessionId);
+                this.drawBattleScreen(this.server.sessionId);
                 break;
             case TrainerState.TIEBREAKER:
                 this.drawTieBreakerScreen(this.server.sessionId);
                 break;
             case TrainerState.DELETE:
                 console.log(`${this.server.sessionId} goes ${state.trainerRankings.get(this.server.sessionId)}`);
-
-                this.drawDeleteScreen(this.server.sessionId)
+                this.drawSelection((i) => {
+                    this.server?.sendMessage(Message.DeleteCard, { index: i });
+                })
                 break;
             case TrainerState.DRAFT:
-                this.drawDraftScreen(this.server.sessionId);
+                this.drawSelection((i) => {
+                    this.server?.sendMessage(Message.DraftCard, { index: i });
+                })
+                break;
+            case TrainerState.WIN:
+                console.log(`I won`);
+                break;
+            case TrainerState.LOSE:
+                console.log(`i lost`);
                 break;
             default:
                 break;
@@ -131,18 +155,21 @@ export default class Game extends Phaser.Scene {
                     this.allGameTrainers.get(key)?.setTrainer(trainer);
 
                 } else {
+
                     this.allGameTrainers.set(key, new GameTrainer(this, trainer));
-                    //TODO Check if this is where the bug of a 5th player happens
+
                 }
             }
         }
         else {
-            for (const [key] of this.allGameTrainers) {
+
+            for (const [key, gameTrainer] of this.allGameTrainers) {
                 const trainer = trainers.get(key);
                 if (trainer) {
-                    this.allGameTrainers.get(key)?.setTrainer(trainer);
-                } else {
 
+                    gameTrainer.setTrainer(trainer);
+                } else {
+                    gameTrainer.destroy();
                     this.allGameTrainers.delete(key);
                 }
             }
@@ -158,12 +185,11 @@ export default class Game extends Phaser.Scene {
         for (let i = 0; i < pokeCards.length; i++) {
             const card = pokeCards[i];
             card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
-                this.server?.selectPokeCard({ index: i });
+                this.server?.sendMessage(Message.SelectPokeCard, { index: i });
             });
         }
 
     }
-
     drawSwapScreen(sessionId: string) {
         //draw
         drawAllCards(this, sessionId, this.allGameTrainers, TrainerField.cardsInPlay, .5, .85);
@@ -173,93 +199,48 @@ export default class Game extends Phaser.Scene {
         for (let i = 0; i < cardInPlay.length; i++) {
             const card = cardInPlay[i];
             card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
-                this.server?.swapWithHidden({ swap: (i == InPlay.SUMONE) })
+                this.server?.sendMessage(Message.SwapPokeCard, { swap: (i == InPlay.SUMONE) });
             });
         }
     }
-
     drawBattleScreen(sessionId: string) {
-        const { width, height } = this.scale;
         const trainer = this.allGameTrainers.get(sessionId)!;
-        const orientation = getOrientation(
-            ScreenOrientation.BOTTOM,
-            1,
-            .5,
-            .85,
-            width,
-            height
-        );
-        drawCards(true, orientation, [trainer.cardsInPlay[InPlay.BATTLE]], 10);
-        if (trainer.opponentId.length > 0) {
+
+        drawCards(true, this.orientation, [trainer.cardsInPlay[InPlay.BATTLE]], 10);
+        if (trainer.opponentId.length > 0 && this.allGameTrainers.get(trainer.opponentId)?.isReadyToFight) {
             const opponent = this.allGameTrainers.get(trainer.opponentId)!;
-            const oppOrientation = getOrientation(
-                ScreenOrientation.TOP,
-                1,
-                .5,
-                .85,
-                width,
-                height
-            );
-            drawCards(false, oppOrientation, [opponent.cardsInPlay[InPlay.BATTLE]], 10);
+
+            drawCards(false, this.oppOrientation, [opponent.cardsInPlay[InPlay.BATTLE]], 10);
             triggerCallbackAfterDelay(() => {
-                this.server?.fight(this.time.now);
+                this.server?.sendMessage(Message.TrainerBattle);
             }, 5)
         } else {
             console.log("waiting for opponent");
-
         }
     }
-
     drawTieBreakerScreen(sessionId: string) {
-        const { width, height } = this.scale;
         const trainer = this.allGameTrainers.get(sessionId)!;
         const opponent = this.allGameTrainers.get(trainer.opponentId)!;
-        const orientation = getOrientation(
-            ScreenOrientation.BOTTOM,
-            1,
-            .5,
-            .85,
-            width,
-            height
-        );
-        const oppOrientation = getOrientation(
-            ScreenOrientation.TOP,
-            1,
-            .5,
-            .85,
-            width,
-            height
-        );
 
-        drawCards(true, orientation, trainer.cardsInPlay, 10);
-        drawCards(false, oppOrientation, opponent.cardsInPlay, 10);
+        drawCards(true, this.orientation, trainer.cardsInPlay, 10);
+        drawCards(false, this.oppOrientation, opponent.cardsInPlay, 10);
 
         const cardInPlay = getCards(TrainerField.cardsInPlay, this.trainer);
         for (let i = 0; i < cardInPlay.length; i++) {
             const card = cardInPlay[i];
             card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
-                this.server?.tieBreaker({ index: i });
+                this.server?.sendMessage(Message.TieBreakerBattle, { index: i });
             });
         }
 
     }
-
-    drawDeleteScreen(sessionId: string) {
+    drawSelection(callback: (i: number) => void) {
         //draw  
-        console.log("delete");
-        const buffer = 5;
+        const buffer = 10;
         const { width, height } = this.scale;
-        const orientation = getOrientation(
-            ScreenOrientation.BOTTOM,
-            1,
-            .5,
-            .85,
-            width,
-            height
-        );
-        let xPosition = (width / 2) - ((cardWidth + buffer) * 3 / 2);
-        let yPosition = (height / 2) - ((cardHeight + buffer) * Math.floor(this.gameDraftPile.length / 3)) / 2;
-        drawCards(true, orientation, this.trainer.pokerHand, 10)
+        let xPosition = (width / 2) - ((cardWidth + buffer) * 3) / 2;
+        let yPosition = (height / 2) - ((cardHeight + buffer) * 4) * .5;
+        drawCards(true, this.orientation, this.trainer.pokerHand, 10)
         for (let i = 0; i < this.gameDraftPile.length; i++) {
             const card = this.gameDraftPile[i];
             card.sprite.visible = true;
@@ -273,49 +254,9 @@ export default class Game extends Phaser.Scene {
                 Math.floor(xPosition + xPlacement),
                 Math.floor(yPosition + yPlacement)
             )
-
-            //add input
             card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
-                this.server?.deleteCard({ index: i });
+                callback(i)
             })
-
-        }
-    }
-    drawDraftScreen(sessionId: string) {
-        //draw  
-        console.log("draft");
-        const buffer = 5;
-        const { width, height } = this.scale;
-        const orientation = getOrientation(
-            ScreenOrientation.BOTTOM,
-            1,
-            .5,
-            .85,
-            width,
-            height
-        );
-        let xPosition = (width / 2) - ((cardWidth + buffer) * 3 / 2);
-        let yPosition = (height / 2) - ((cardHeight + buffer) * Math.floor(this.gameDraftPile.length / 3)) / 2;
-        drawCards(true, orientation, this.trainer.pokerHand, 10)
-        for (let i = 0; i < this.gameDraftPile.length; i++) {
-            const card = this.gameDraftPile[i];
-            card.sprite.visible = true;
-
-            let xPlacement = (cardWidth + buffer) * (card.cardData.placement % 3);
-            let yPlacement = Math.floor(card.cardData.placement / 3) * (cardHeight + buffer);
-
-            card.sprite.setInteractive();
-
-            card.setPosition(
-                Math.floor(xPosition + xPlacement),
-                Math.floor(yPosition + yPlacement)
-            )
-
-            //add input
-            card.sprite.on(GAMEOBJECT_POINTER_UP, () => {
-                this.server?.draftCard({index: i});
-            })
-
         }
     }
 }

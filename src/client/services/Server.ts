@@ -1,7 +1,6 @@
 import { Client, Room } from 'colyseus.js';
 import Phaser from 'phaser';
-import { Message } from '../../SharedTypes/Enums';
-import { IGameState } from '../../server/src/rooms/schema/GameState';
+import { IGameState, Message } from '../../Const';
 import { Schema } from '@colyseus/schema';
 
 
@@ -30,6 +29,8 @@ export default class Server {
         this.room.onStateChange((state) => {
             this.events.emit(ServerEvents.StateChange, state);
         })
+
+
     }
 
     public onceStateChanged(callBack: (state: any) => void, context?: any) {
@@ -40,37 +41,9 @@ export default class Server {
     }
 
 
-
-    public selectPokeCard(payload: {index: number}) {
-        
+    public sendMessage<T>(message: Message, payload?: T) {
         if (!this.room) return;
-        this.room.send(Message.SelectPokeCard, payload);
-    }
-
-    public swapWithHidden(payload: { swap: boolean }){
-        if (!this.room) return;
-        this.room.send(Message.SwapPokeCard, payload);
-    }
-
-    public fight(i: number) {
-        console.log(`fight ${i}`);
-        
-        if (!this.room) return;
-        this.room.send(Message.TrainerBattle);
-    }
-
-    public tieBreaker(payload: {index: number}){
-        if (!this.room) return;
-        this.room.send(Message.TieBreakerBattle, payload)
-    }
-
-    public deleteCard(payload: {index: number}){
-        if (!this.room) return;
-        this.room.send(Message.DeleteCard, payload)
-    }
-    public draftCard(payload: {index: number}){
-        if (!this.room) return;
-        this.room.send(Message.DraftCard, payload)
+        this.room.send(message, payload);
     }
 
 

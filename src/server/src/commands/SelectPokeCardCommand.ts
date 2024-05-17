@@ -1,22 +1,17 @@
 import { Command } from "@colyseus/command";
-import { Client } from 'colyseus';
-import Gym from "../src/rooms/Gym";
 import DealSumCardsCommand from './DealSumCardsCommand';
-import { InPlay } from "../../SharedTypes/Enums";
-import { TrainerState } from "../src/rooms/schema/Trainer";
+import { type PayloadIndex } from "../ServerUtils";
+import type Gym from "../rooms/Gym";
+import { InPlay } from "../../../Const";
 
-type Payload = {
-    client: Client,
 
-    num: number
-}
 
-export default class SelectPokeCardCommand extends Command<Gym, Payload> {
+export default class SelectPokeCardCommand extends Command<Gym, PayloadIndex> {
 
-    execute(data: Payload) {
+    execute(data: PayloadIndex) {
 
-        const { client, num: index } = data;
-
+        const { client, index } = data;
+        
         const trainer = this.state.trainers.get(client.sessionId);
         if (!trainer.pokeCards[index]) {
             console.error(`NO CARD TO REMOVED INVALID INDEX ${index}`);
@@ -25,7 +20,6 @@ export default class SelectPokeCardCommand extends Command<Gym, Payload> {
         trainer.cardsInPlay.push(trainer.pokeCards[index]);
         trainer.cardsInPlay[InPlay.BATTLE].placement = 0;
         trainer.pokeCards.deleteAt(index);
-        this.state.doneFighting.set(client.sessionId, false);
         this.room.dispatcher.dispatch(new DealSumCardsCommand(), { client: client });
     }
 }

@@ -1,13 +1,14 @@
-import { ArraySchema } from '@colyseus/schema';
+import { type ArraySchema } from '@colyseus/schema';
 import GameCard from './GameCard';
-import { Card } from '../../server/src/rooms/schema/Card';
-import { Trainer, TrainerState } from '../../server/src/rooms/schema/Trainer';
+import type Card from '../../server/src/rooms/schema/Card';
+import type Trainer from '../../server/src/rooms/schema/Trainer';
+import { type TrainerState } from '../../Const';
 
 export default class GameTrainer {
     public pokeCards: GameCard[] = [];
     public pokerHand: GameCard[] = [];
     public cardsInPlay: GameCard[] = [];
-    public state: TrainerState = TrainerState.CHOOSE;
+    public state: TrainerState;
     public opponentId: string = "";
     public isReadyToFight = false;
     constructor(private scene: Phaser.Scene, private trainer: Trainer) {
@@ -26,7 +27,17 @@ export default class GameTrainer {
     get sessionId(): string {
         return this.trainer.id;
     }
-
+    destroy() {
+        const allCards = [
+            ...this.pokeCards,
+            ...this.pokerHand,
+            ...this.cardsInPlay
+        ]
+        for (let i = 0; i < allCards.length; i++) {
+            const card = allCards[i];
+            card.sprite.destroy();
+        }
+    }
     setTrainer(trainer: Trainer) {
         this.trainer = trainer;
         this.state = trainer.state;
@@ -41,23 +52,30 @@ export default class GameTrainer {
             this.addToHand(trainer.pokerHand, this.pokerHand);
         else this.setHand(trainer.pokerHand, this.pokerHand);
 
-        if (trainer.cardsInPlay.length > this.cardsInPlay.length)
+        if (trainer.cardsInPlay.length > this.cardsInPlay.length) {
+
             this.addToHand(trainer.cardsInPlay, this.cardsInPlay);
-        else this.setHand(trainer.cardsInPlay, this.cardsInPlay);
+        }
+        else {
+
+            this.setHand(trainer.cardsInPlay, this.cardsInPlay);
+        }
 
     }
 
     private addToHand(serverHand: ArraySchema<Card>, clientHand: GameCard[]) {
         serverHand.forEach((c: Card, index: number) => {
-            if(clientHand[index]) clientHand[index].sprite.destroy();
+            if (clientHand[index]) clientHand[index].sprite.destroy();
             clientHand[index] = new GameCard(this.scene, c);
         });
     }
     private setHand(serverHand: ArraySchema<Card>, clientHand: GameCard[]) {
         for (let i = clientHand.length - 1; i >= 0; i--) {
             if (i < serverHand.length) {
+
                 clientHand[i].setCard(serverHand[i]);
             } else {
+
                 //TODO don't destroy image have it move position but still remove it from array   
                 clientHand[i].sprite.destroy();
                 clientHand.splice(i, 1);
