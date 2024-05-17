@@ -29,7 +29,6 @@ export default class DetermineBattleCommand extends Command<Gym, Payload> {
         fightCount++;
         let clientCard = trainer.cardsInPlay[InPlay.BATTLE];
         let opponentCard = opponent.cardsInPlay[InPlay.BATTLE];
-
         console.log(`${client.sessionId} opponent is ${trainer.opponentId}`);
 
         const clientPower = this.determinePower(clientCard, opponentCard);

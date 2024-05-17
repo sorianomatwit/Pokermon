@@ -15,15 +15,16 @@ export default class SwappingPokeCard extends Command<Gym, boolPayload> {
         if (!trainer) return;
         if (bool) {
             const temp = trainer.cardsInPlay[InPlay.BATTLE];
-            trainer.cardsInPlay[InPlay.BATTLE] = trainer.cardsInPlay[1];
-            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = true;
             trainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = false;
-            trainer.cardsInPlay[InPlay.SUMONE] = temp;
+            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToClient = false;
             trainer.cardsInPlay[InPlay.SUMONE].isRevealedToEveryone = false;
+            trainer.cardsInPlay[InPlay.SUMONE].isRevealedToClient = true;
+            trainer.cardsInPlay[InPlay.BATTLE] = trainer.cardsInPlay[InPlay.SUMONE];
+            trainer.cardsInPlay[InPlay.SUMONE] = temp;
         }
         trainer.cardsInPlay[InPlay.BATTLE].placement = InPlay.BATTLE;
         trainer.cardsInPlay[InPlay.SUMONE].placement = InPlay.SUMONE;
-        this.room.dispatcher.dispatch(new CalculateSumCommand(), {client: client})
+        this.room.dispatcher.dispatch(new CalculateSumCommand(), { client: client })
 
     }
 }

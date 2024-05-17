@@ -39,6 +39,7 @@ export default class SetOpponentsCommand extends Command<Gym> {
                 trainerEntries[thirdPlace] = trainerEntries[secondPlace];
                 trainerEntries[secondPlace] = temp;
             }
+
         }
         for (let i = 0; i < keys.length; i += 2) {
             const key = keys[i];
@@ -51,11 +52,6 @@ export default class SetOpponentsCommand extends Command<Gym> {
             opponent.setState(TrainerState.BASE_BATTLE);
             trainer.isReadyToFight = true;
             opponent.isReadyToFight = true;
-            this.state.resetAllCardsVisibility(key);
-            this.state.resetAllCardsVisibility(oppKey);
-
-            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = true;
-            opponent.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = true;
         }
         trainerSums.clear();
     }

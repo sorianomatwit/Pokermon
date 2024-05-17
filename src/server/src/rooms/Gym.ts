@@ -4,7 +4,7 @@ import { Dispatcher } from '@colyseus/command';
 import { ArraySchema } from '@colyseus/schema';
 import Trainer from './schema/Trainer';
 import Card from './schema/Card';
-import { Message } from '../../../Const';
+import { InPlay, Message } from '../../../Const';
 import DraftCommand from '../commands/DraftCommand';
 import SwappingPokeCard from '../commands/SwappingCardCommand';
 import TieBreakerCommand from '../commands/TieBreakerCommand';
@@ -35,7 +35,7 @@ export default class Gym extends Room<GameState> {
         });
 
         this.onMessage(Message.TrainerBattle, (client: Client) => {
-
+            
             this.dispatcher.dispatch(new DetermineBattleCommand(), { client: client });
         })
 
@@ -54,7 +54,7 @@ export default class Gym extends Room<GameState> {
     }
     onJoin(client: Client, options: any) {
 
-        this.state.trainers.set(client.sessionId, new Trainer(client.sessionId)); 
+        this.state.trainers.set(client.sessionId, new Trainer(client.sessionId));
         this.state.pickOrder.push("");
         //Deal 5 cards
         const trainer = this.state.trainers.get(client.sessionId);

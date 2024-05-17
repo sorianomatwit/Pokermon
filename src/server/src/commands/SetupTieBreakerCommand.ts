@@ -20,6 +20,7 @@ export default class SetupTieBreakerCommand extends Command<Gym, Payload> {
         const temp = trainer.cardsInPlay[InPlay.SUMONE];
         trainer.cardsInPlay[InPlay.SUMONE] = trainer.cardsInPlay[InPlay.SUMTWO];
         trainer.cardsInPlay[InPlay.SUMTWO] = temp;
+        
         for (let i = 0; i < trainer.cardsInPlay.length; i++) {
             trainer.cardsInPlay[i].isRevealedToClient = true;
             trainer.cardsInPlay[i].placement = i;
