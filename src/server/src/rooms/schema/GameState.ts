@@ -35,14 +35,14 @@ export default class GameState extends Schema implements IGameState {
         let k = 2
         for (let i = 2; i <= 14; i++) {
             for (const s of Object.values(Suite)) {
-                const image = `sprite_ele_${k.toString()}`;
+                const image = `sprite_electric_${k.toString()}`;
                 const value = i;
                 const suite = s;
                 this.pickupPile.push(
                     new Card(value, suite, image, -1)
                 )
-                if (k == 4) k = 2;
                 k++;
+                if (k > 14) k = 2;
             }
         }
 

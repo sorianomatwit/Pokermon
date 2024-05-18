@@ -3,10 +3,10 @@ import Card from './server/src/rooms/schema/Card';
 import Trainer from './server/src/rooms/schema/Trainer';
 import Phaser from 'phaser';
 export enum Suite {
-    GRASS = "GRASS",
-    FLYING = "FLYING",
-    GROUND = "GROUND",
-    ELECTRIC = "ELECTRIC"
+    GRASS = "grass",
+    FLYING = "flying",
+    GROUND = "ground",
+    ELECTRIC = "electric"
 }
 
 export enum Message {
