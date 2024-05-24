@@ -35,17 +35,7 @@ function compareHands(hand1: ArraySchema<Card>, hand2: ArraySchema<Card>): numbe
     return 0;
 };
 
-function determineWinner(hands: ArraySchema<Card>[]): number {
-    let winnerIndex = 0;
 
-    for (let i = 1; i < hands.length; i++) {
-        if (compareHands(hands[i], hands[winnerIndex]) > 0) {
-            winnerIndex = i;
-        }
-    }
-
-    return winnerIndex;
-};
 
 function determineHand(cards: ArraySchema<Card>): PokerHand {
     if (isRoyalFlush(cards)) return PokerHand.RoyalFlush;
@@ -125,4 +115,4 @@ type PayloadIndex = Payload & {
     index: number
 }
 
-export { determineHand, determineWinner, compareHands, PokerHand, Payload, PayloadIndex };
+export { determineHand, compareHands, PokerHand, Payload, PayloadIndex };

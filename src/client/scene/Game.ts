@@ -73,6 +73,7 @@ export default class Game extends Phaser.Scene {
         const { trainers, draftPile } = state;
         this.updateTrainers(trainers);
 
+        //UPDATE DRAFT PILE
         if (draftPile.length > this.gameDraftPile.length) {
             for (let k = 0; k < draftPile.length; k++) {
                 const card = draftPile[k];
@@ -91,6 +92,9 @@ export default class Game extends Phaser.Scene {
                 }
             }
         }
+        //CHECK IF BATTLE IS IN PROGRESS 
+        let battleInProgress = false;
+        //RESET ALL CARDS
         for (const [_, gameTrainer] of this.allGameTrainers) {
             const allCards = [
                 ...this.gameDraftPile,
@@ -107,6 +111,7 @@ export default class Game extends Phaser.Scene {
                 })
                 card.sprite.visible = false;
             }
+            battleInProgress = battleInProgress || (gameTrainer.state == TrainerState.BASE_BATTLE || gameTrainer.state == TrainerState.CHAMPION_BATTLE);
         }
 
         switch (this.trainer.state) {
@@ -116,7 +121,10 @@ export default class Game extends Phaser.Scene {
                 break;
             case TrainerState.SWAP:
                 // draw card in play and show button to either swap to no
-                this.drawSwapScreen(this.server.sessionId);
+                if (!state.trainerSums.has(this.server.sessionId)) {
+                    this.drawSwapScreen(this.server.sessionId);
+                } else console.log(`waiting for opponents to ready up`);
+                
                 break;
             case TrainerState.BASE_BATTLE:
             case TrainerState.CHAMPION_BATTLE:
@@ -127,9 +135,11 @@ export default class Game extends Phaser.Scene {
                 break;
             case TrainerState.DELETE:
                 console.log(`${this.server.sessionId} goes ${state.trainerRankings.get(this.server.sessionId)}`);
-                this.drawSelection((i) => {
-                    this.server?.sendMessage(Message.DeleteCard, { index: i });
-                })
+                if (!battleInProgress) {
+                    this.drawSelection((i) => {
+                        this.server?.sendMessage(Message.DeleteCard, { index: i });
+                    })
+                } else console.log("Waiting for battles to finish");
                 break;
             case TrainerState.DRAFT:
                 this.drawSelection((i) => {
@@ -209,6 +219,7 @@ export default class Game extends Phaser.Scene {
         drawCards(true, this.orientation, [trainer.cardsInPlay[InPlay.BATTLE]], 10);
         if (trainer.opponentId.length > 0 && this.allGameTrainers.get(trainer.opponentId)?.isReadyToFight) {
             const opponent = this.allGameTrainers.get(trainer.opponentId)!;
+            console.log(opponent.cardsInPlay[InPlay.BATTLE].cardData.isRevealedToEveryone);
 
             drawCards(false, this.oppOrientation, [opponent.cardsInPlay[InPlay.BATTLE]], 10);
             triggerCallbackAfterDelay(() => {

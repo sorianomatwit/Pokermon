@@ -47,8 +47,6 @@ export default class Gym extends Room<GameState> {
             this.dispatcher.dispatch(new DeleteCommand(), { client: client, index: message.index });
         })
         this.onMessage(Message.DraftCard, (client: Client, message: { index: number }) => {
-            console.log("draft");
-
             this.dispatcher.dispatch(new DraftCommand(), { client: client, index: message.index });
         })
     }
@@ -92,6 +90,8 @@ export default class Gym extends Room<GameState> {
             cards.push(this.state.pickupPile[rIndex]);
             const place = cards.length - 1;
             cards[place].placement = place;
+            cards[place].isRevealedToClient = false;
+            cards[place].isRevealedToEveryone = false;
             this.state.pickupPile.deleteAt(rIndex);
         }
 

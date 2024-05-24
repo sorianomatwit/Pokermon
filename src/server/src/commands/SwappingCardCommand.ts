@@ -1,8 +1,8 @@
 import { Command } from "@colyseus/command";
-import CalculateSumCommand from "./CalculateSumCommand";
 import Gym from "../rooms/Gym";
 import { InPlay } from "../../../Const";
 import { Payload } from "../ServerUtils";
+import SetOpponentsCommand from "./SetOpponentsCommand";
 
 type boolPayload = Payload & {
     bool: boolean
@@ -24,7 +24,14 @@ export default class SwappingPokeCard extends Command<Gym, boolPayload> {
         }
         trainer.cardsInPlay[InPlay.BATTLE].placement = InPlay.BATTLE;
         trainer.cardsInPlay[InPlay.SUMONE].placement = InPlay.SUMONE;
-        this.room.dispatcher.dispatch(new CalculateSumCommand(), { client: client })
+        
+        this.state.trainerSums.set(
+            client.sessionId,
+            trainer.cardsInPlay[InPlay.SUMONE].value + trainer.cardsInPlay[InPlay.SUMTWO].value
+        )
+        if (this.state.trainerSums.size == this.state.trainers.size) {
+            return new SetOpponentsCommand();
+        }
 
     }
 }

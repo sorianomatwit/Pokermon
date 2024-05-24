@@ -6,9 +6,10 @@ import { InPlay, TrainerState } from '../../../Const';
 export default class SetOpponentsCommand extends Command<Gym> {
 
     execute() {
-        console.log("setting opps");
-
+        console.log("making matching");
+        //calculate sums
         const { trainers, trainerSums } = this.state;
+
 
         const trainerEntries = Array.from(trainerSums.entries());
 
@@ -52,6 +53,12 @@ export default class SetOpponentsCommand extends Command<Gym> {
             opponent.setState(TrainerState.BASE_BATTLE);
             trainer.isReadyToFight = true;
             opponent.isReadyToFight = true;
+            trainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = true;
+            trainer.cardsInPlay.reverse();
+            trainer.cardsInPlay.reverse();
+            opponent.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = true;
+            opponent.cardsInPlay.reverse();
+            opponent.cardsInPlay.reverse();
         }
         trainerSums.clear();
     }

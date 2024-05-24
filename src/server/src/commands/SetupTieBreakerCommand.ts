@@ -8,7 +8,7 @@ import { InPlay, TrainerState } from '../../../Const';
 export default class SetupTieBreakerCommand extends Command<Gym, Payload> {
 
     execute(data: Payload) {
-        console.log("set up tie vars");
+        console.log("TIE!!!");
 
         const { client } = data;
         const trainer = this.state.trainers.get(client.sessionId)!;

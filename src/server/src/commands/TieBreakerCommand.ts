@@ -21,10 +21,10 @@ export default class TieBreakerCommand extends Command<Gym, PayloadIndex> {
         trainer.cardsInPlay[index] = oldBattleCard;
 
         trainer.isReadyToFight = true;
-        console.log(`${client.sessionId} has selected card against ${opponent.id}`);
 
         trainer.cardsInPlay[InPlay.SUMONE].isRevealedToClient = false;
         trainer.cardsInPlay[InPlay.SUMTWO].isRevealedToClient = false;
+        trainer.cardsInPlay[InPlay.BATTLE].isRevealedToEveryone = true;
         trainer.setState(trainer.previousState);
 
     }

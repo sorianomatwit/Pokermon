@@ -12,7 +12,7 @@ export const allSprites = [
     { key: "sprite_electric_9", url: "assets/electric/sprite_electric_9.png" },
     { key: "sprite_electric_10", url: "assets/electric/sprite_electric_10.png" },
     { key: "sprite_electric_11", url: "assets/electric/sprite_electric_11.png" },
-    { key: "sprite_electric_12", url: "assets/electric/sprite_electric_12png" },
+    { key: "sprite_electric_12", url: "assets/electric/sprite_electric_12.png" },
     { key: "sprite_electric_13", url: "assets/electric/sprite_electric_13.png" },
     { key: "sprite_electric_14", url: "assets/electric/sprite_electric_14.png" },
 ]

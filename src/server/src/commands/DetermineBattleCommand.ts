@@ -8,7 +8,6 @@ import { InPlay, Suite, TrainerState } from '../../../Const';
 import SetupTieBreakerCommand from './SetupTieBreakerCommand';
 
 
-let fightCount = 0;
 export default class DetermineBattleCommand extends Command<Gym, Payload> {
 
     private determinePower(clientCard: Card, opponentCard: Card): number {
@@ -26,7 +25,6 @@ export default class DetermineBattleCommand extends Command<Gym, Payload> {
         const trainer = this.state.trainers.get(client.sessionId);
         const opponent = this.state.trainers.get(trainer.opponentId);
         if (!trainer.isReadyToFight) return;
-        fightCount++;
         let clientCard = trainer.cardsInPlay[InPlay.BATTLE];
         let opponentCard = opponent.cardsInPlay[InPlay.BATTLE];
         console.log(`${client.sessionId} opponent is ${trainer.opponentId}`);
@@ -61,7 +59,6 @@ export default class DetermineBattleCommand extends Command<Gym, Payload> {
         }
 
         if (trainer.state == TrainerState.DELETE) {
-            console.log(fightCount);
             this.room.dispatcher.dispatch(new GatherDraftCardsCommand(), { client: client });
         }
     }

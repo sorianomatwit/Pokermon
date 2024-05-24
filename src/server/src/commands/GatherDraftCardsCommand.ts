@@ -16,10 +16,7 @@ export default class GatherDraftCardsCommand extends Command<Gym, Payload> {
             this.state.draftPile.push(card);
             card.isRevealedToEveryone = true;
             card.placement = this.state.draftPile.length - 1;
-
-            //trainer.cardsInPlay.deleteAt(i);
         }
-        console.log(`draft: ${this.state.draftPile.length}`);
 
         this.state.pickOrder[rank] = key;
         let playerCount = 0;

@@ -11,7 +11,6 @@ export default class DeleteCommand extends Command<Gym, PayloadIndex> {
         const { client, index } = data;
         const trainerRank = this.state.trainerRankings.get(client.sessionId);
         const card = this.state.draftPile[index];
-        console.log(`${client.sessionId} picked ${index} amount ${this.state.draftPile.length}`);
         if (client.sessionId == this.state.activePlayer && card) {
             card.isRevealedToClient = false;
             card.isRevealedToEveryone = false;
@@ -26,7 +25,7 @@ export default class DeleteCommand extends Command<Gym, PayloadIndex> {
                     trainer.setState(TrainerState.DRAFT);
                 }
             }
-        } else console.error(`${client.sessionId} rank ${trainerRank} doesn't exist active is ${this.state.activePlayer}`)
+        }
 
     }
 }

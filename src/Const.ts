@@ -1,7 +1,6 @@
 import { ArraySchema, MapSchema } from '@colyseus/schema';
 import Card from './server/src/rooms/schema/Card';
 import Trainer from './server/src/rooms/schema/Trainer';
-import Phaser from 'phaser';
 export enum Suite {
     GRASS = "grass",
     FLYING = "flying",
