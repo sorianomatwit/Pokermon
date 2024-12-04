@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import type Server from '../services/Server';
 import type IGameState from '../../server/src/rooms/schema/GameState';
 import GameTrainer from '../GameObjects/GameTrainer';
-import { cardHeight, cardWidth, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation, TrainerField, type TrainerOrientation } from '../GameObjects/GameConst';
+import { CARD_HEIGHT, CARD_WIDTH, GAMEOBJECT_POINTER_UP, GameScenes, ScreenOrientation, TrainerField, type TrainerOrientation } from '../GameObjects/GameConst';
 import { drawAllCards, drawCards, getCards, getOrientation, triggerCallbackAfterDelay } from '../GameObjects/GameUtils';
 import type Trainer from '../../server/src/rooms/schema/Trainer';
 import { MapSchema } from '@colyseus/schema';
@@ -249,15 +249,15 @@ export default class Game extends Phaser.Scene {
         //draw  
         const buffer = 10;
         const { width, height } = this.scale;
-        let xPosition = (width / 2) - ((cardWidth + buffer) * 3) / 2;
-        let yPosition = (height / 2) - ((cardHeight + buffer) * 4) * .5;
+        let xPosition = (width / 2) - ((CARD_WIDTH + buffer) * 3) / 2;
+        let yPosition = (height / 2) - ((CARD_HEIGHT + buffer) * 4) * .5;
         drawCards(true, this.orientation, this.trainer.pokerHand, 10)
         for (let i = 0; i < this.gameDraftPile.length; i++) {
             const card = this.gameDraftPile[i];
             card.sprite.visible = true;
 
-            let xPlacement = (cardWidth + buffer) * (card.cardData.placement % 3);
-            let yPlacement = Math.floor(card.cardData.placement / 3) * (cardHeight + buffer);
+            let xPlacement = (CARD_WIDTH + buffer) * (card.cardData.placement % 3);
+            let yPlacement = Math.floor(card.cardData.placement / 3) * (CARD_HEIGHT + buffer);
 
             card.sprite.setInteractive();
 

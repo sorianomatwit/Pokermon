@@ -5,8 +5,8 @@ export type TrainerOrientation = {
     screenPlacement: ScreenOrientation
 }
 
-export const cardWidth = 67;
-export const cardHeight = 93;
+export const CARD_WIDTH = 67;
+export const CARD_HEIGHT = 93;
 
 
 export const GAMEOBJECT_POINTER_UP = Phaser.Input.Events.GAMEOBJECT_POINTER_UP;

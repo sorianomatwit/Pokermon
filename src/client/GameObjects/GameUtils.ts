@@ -1,6 +1,6 @@
 import GameCard from './GameCard';
 import GameTrainer from './GameTrainer';
-import { cardWidth, ScreenOrientation, TrainerField, TrainerOrientation } from './GameConst';
+import { CARD_WIDTH, ScreenOrientation, TrainerField, TrainerOrientation } from './GameConst';
 import { Scene } from "phaser";
 
 export function getOrientation(
@@ -13,20 +13,20 @@ export function getOrientation(
 ): TrainerOrientation {
 
     //NOTE DEFAULT IS ScreenOrientation.BOTTOM
-    let _xStart = gameWidth * _xMultiplier - (cardWidth * maxCards) / 2;
+    let _xStart = gameWidth * _xMultiplier - (CARD_WIDTH * maxCards) / 2;
     let _yStart = gameHeight * _yMultiplier;
     let angle = 0;
     if (screenPlacement == ScreenOrientation.LEFT) {// left
         _xStart = gameWidth * (1 - _yMultiplier);
-        _yStart = gameHeight * _xMultiplier - (cardWidth * maxCards) / 2;
+        _yStart = gameHeight * _xMultiplier - (CARD_WIDTH * maxCards) / 2;
         angle = 90;
     } else if (screenPlacement == ScreenOrientation.TOP) {// top
-        _xStart = gameWidth * _xMultiplier - (cardWidth * maxCards) / 2;
+        _xStart = gameWidth * _xMultiplier - (CARD_WIDTH * maxCards) / 2;
         _yStart = gameHeight * (1 - _yMultiplier);
         angle = 180;
     } else if (screenPlacement === ScreenOrientation.RIGHT) {// right
         _xStart = gameWidth * _yMultiplier;
-        _yStart = gameHeight * _xMultiplier - (cardWidth * maxCards) / 2;
+        _yStart = gameHeight * _xMultiplier - (CARD_WIDTH * maxCards) / 2;
         angle = -90;
     }
     return {
@@ -89,13 +89,13 @@ export function drawCards(isClient: boolean, orientation: TrainerOrientation, ca
         const card = cards[k];
         card.sprite.visible = true;
         card.sprite.setAngle(_angle);
-        let xPlacement = (cardWidth + buffer) * card.cardData.placement;
+        let xPlacement = (CARD_WIDTH + buffer) * card.cardData.placement;
         let yPlacement = 0;
         const isLeft = screenPlacement == ScreenOrientation.LEFT;
         const isRight = screenPlacement == ScreenOrientation.RIGHT
         if (isLeft || isRight) {// left or right
             xPlacement = 0;
-            yPlacement = (cardWidth + buffer) * card.cardData.placement;
+            yPlacement = (CARD_WIDTH + buffer) * card.cardData.placement;
         }
         const showCard = (card.cardData.isRevealedToEveryone) || (isClient && card.cardData.isRevealedToClient)
         
